@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Eternal List</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#111;
+    color:white;
+    font-family:'Inter',sans-serif;
+}
+
+header{
+    width:100%;
+    background:#1a1a1a;
+    border-bottom:2px solid #d62d2d;
+    padding:20px 60px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo{
+    font-size:32px;
+    font-weight:800;
+    color:#ff4040;
+}
+
+nav{
+    display:flex;
+    gap:30px;
+}
+
+nav a{
+    color:white;
+    text-decoration:none;
+    font-weight:600;
+    transition:0.2s;
+}
+
+nav a:hover{
+    color:#ff4040;
+}
+
+.hero{
+    padding:80px 60px;
+}
+
+.hero h1{
+    font-size:64px;
+    margin-bottom:15px;
+}
+
+.hero p{
+    color:#aaa;
+    font-size:18px;
+}
+
+.list-container{
+    padding:0 60px 80px;
+}
+
+.section-title{
+    font-size:32px;
+    margin-bottom:30px;
+    color:#ff4040;
+}
+
+.demon-list{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+}
+
+.demon-card{
+    background:#1c1c1c;
+    border:1px solid #2d2d2d;
+    border-left:6px solid #d62d2d;
+
+    padding:20px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    transition:0.2s;
+}
+
+.demon-card:hover{
+    transform:translateY(-2px);
+    border-color:#ff4040;
+}
+
+.left{
+    display:flex;
+    align-items:center;
+    gap:20px;
+}
+
+.position{
+    font-size:28px;
+    font-weight:800;
+    color:#ff4040;
+    width:50px;
+}
+
+.demon-info h2{
+    font-size:24px;
+}
+
+.demon-info p{
+    color:#999;
+    margin-top:5px;
+}
+
+.video-btn{
+    background:#d62d2d;
+    border:none;
+    color:white;
+    padding:12px 22px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:700;
+    transition:0.2s;
+}
+
+.video-btn:hover{
+    background:#ff4040;
+}
+
+footer{
+    border-top:1px solid #2d2d2d;
+    padding:30px;
+    text-align:center;
+    color:#777;
+}
+
+@media(max-width:900px){
+
+    header{
+        flex-direction:column;
+        gap:20px;
+        padding:25px;
+    }
+
+    nav{
+        flex-wrap:wrap;
+        justify-content:center;
+    }
+
+    .hero{
+        padding:50px 25px;
+    }
+
+    .hero h1{
+        font-size:42px;
+    }
+
+    .list-container{
+        padding:0 25px 60px;
+    }
+
+    .demon-card{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:20px;
+    }
+}
+
+</style>
+</head>
+<body>
+
+<header>
+
+<div class="logo">
+Eternal List
+</div>
+
+<nav>
+<a href="#">Home</a>
+<a href="#">Main List</a>
+<a href="#">Extended List</a>
+<a href="#">Submit Record</a>
+<a href="#">Players</a>
+</nav>
+
+</header>
+
+<section class="hero">
+
+<h1>Eternal List</h1>
+
+<p>
+The ultimate Geometry Dash Demonlist experience.
+Track the hardest demons, records, and top players.
+</p>
+
+</section>
+
+<section class="list-container">
+
+<h2 class="section-title">Main List</h2>
+
+<div class="demon-list">
+
+<div class="demon-card">
+
+<div class="left">
+
+<div class="position">1</div>
+
+<div class="demon-info">
+<h2>Acheron</h2>
+<p>by Ryamu • Verified by Zoink</p>
+</div>
+
+</div>
+
+<button class="video-btn">
+Watch
+</button>
+
+</div>
+
+<div class="demon-card">
+
+<div class="left">
+
+<div class="position">2</div>
+
+<div class="demon-info">
+<h2>Tidal Wave</h2>
+<p>by OniLink • Verified by Zoink</p>
+</div>
+
+</div>
+
+<button class="video-btn">
+Watch
+</button>
+
+</div>
+
+<div class="demon-card">
+
+<div class="left">
+
+<div class="position">3</div>
+
+<div class="demon-info">
+<h2>Avernus</h2>
+<p>by Pocke • Verified by Zoink</p>
+</div>
+
+</div>
+
+<button class="video-btn">
+Watch
+</button>
+
+</div>
+
+<div class="demon-card">
+
+<div class="left">
+
+<div class="position">4</div>
+
+<div class="demon-info">
+<h2>Silent Clubstep</h2>
+<p>by Sailent • Verified by Paqoe</p>
+</div>
+
+</div>
+
+<button class="video-btn">
+Watch
+</button>
+
+</div>
+
+<div class="demon-card">
+
+<div class="left">
+
+<div class="position">5</div>
+
+<div class="demon-info">
+<h2>Kyouki</h2>
+<p>by Demishio • Verified by Luqualizer</p>
+</div>
+
+</div>
+
+<button class="video-btn">
+Watch
+</button>
+
+</div>
+
+</div>
+
+</section>
+
+<footer>
+
+Eternal List © 2026
+
+</footer>
+
+</body>
+</html>
