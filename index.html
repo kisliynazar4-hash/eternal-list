@@ -21,36 +21,46 @@ background:#1a1a1a;
 border-bottom:2px solid #d62d2d;
 display:flex;
 justify-content:space-between;
+align-items:center;
 }
 
-.logo{color:#ff4040;font-weight:800;font-size:24px}
+.logo{
+color:#ff4040;
+font-weight:800;
+font-size:24px;
+}
 
 nav a{
 color:white;
 margin:0 10px;
 text-decoration:none;
+cursor:pointer;
 }
+
+nav a:hover{color:#ff4040}
 
 section{padding:20px}
 
 .card{
 background:#1c1c1c;
-padding:15px;
-margin:10px 0;
+padding:12px;
+margin:8px 0;
 border-left:5px solid #d62d2d;
 }
 
 h2{color:#ff4040}
 
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:20px;
-}
+.hidden{display:none}
 
-@media(max-width:800px){
-.grid{grid-template-columns:1fr;}
+button{
+background:#d62d2d;
+color:white;
+border:none;
+padding:6px 10px;
+cursor:pointer;
+margin-top:10px;
 }
+button:hover{background:#ff4040}
 </style>
 </head>
 
@@ -58,82 +68,117 @@ gap:20px;
 
 <header>
 <div class="logo">Eternal List</div>
+
 <nav>
-<a href="#levels">Levels</a>
-<a href="#players">Players</a>
+<a onclick="showPage('levels')">Levels</a>
+<a onclick="showPage('players')">Players</a>
 </nav>
 </header>
 
-<section>
-<h2>🔥 Main Dashboard</h2>
-<p>Welcome to Eternal List - Geometry Dash Demonlist</p>
-</section>
-
-<div class="grid">
-
-<!-- LEVELS -->
-<section id="levels">
-<h2>📊 Top 100 Levels</h2>
+<!-- LEVELS PAGE -->
+<section id="levelsPage">
+<h2>📊 Top Levels</h2>
 <div id="levelsList"></div>
+
+<button onclick="addLevel()">+ Add Level</button>
 </section>
 
-<!-- PLAYERS -->
-<section id="players">
-<h2>🏆 Top 10 Players</h2>
+<!-- PLAYERS PAGE -->
+<section id="playersPage" class="hidden">
+<h2>🏆 Top Players</h2>
 <div id="playersList"></div>
-</section>
 
-</div>
+<button onclick="addPlayer()">+ Add Player</button>
+</section>
 
 <script>
 
-// 🏆 TOP 10 PLAYERS
-const players = [
+//////////////////////
+// ✏️ EDIT HERE
+//////////////////////
+
+let levels = [
+"Thinking Space V",
+"Megatrone",
+"Miiopk009 Ship Trials (Buffed)",
+"Silent Thinking Space 2",
+"Silent Unleashed Kyouki",
+"Ashley Wave Trials (Buffed, Balanced)",
+"Sakupen End (Megabuffed, Possible, Balanced)",
+"Death Corridor (Buffed, Possible)",
+"Zoink game trials",
+"Top 10"
+];
+
+let players = [
+"Miiopk009",
 "Zoink",
+"Doggie",
+"Vortrox",
+"SikuLLL",
+"Gamer999",
 "Trick",
-"NiKo",
-"Sillow",
-"Swiborg",
-"SpaceUK",
-"Solar",
-"Juhou",
-"Blitzer",
-"Technical"
+"Arshadow",
+"GalaxySamok",
+"Riot"
 ];
 
-// 📊 TOP 100 LEVELS (auto generated)
-const levels = [
-"Acheron",
-"Tidal Wave",
-"Avernus",
-"Silent Clubstep",
-"Kyouki"
-];
+//////////////////////
+// RENDER FUNCTIONS
+//////////////////////
 
-// generate fake remaining levels
-for(let i=6;i<=100;i++){
-levels.push("Level " + i);
+function renderLevels(){
+const list = document.getElementById("levelsList");
+list.innerHTML = "";
+levels.forEach((l,i)=>{
+list.innerHTML += `<div class="card">#${i+1} ${l}</div>`;
+});
 }
 
-// render players
-const playersList = document.getElementById("playersList");
-
+function renderPlayers(){
+const list = document.getElementById("playersList");
+list.innerHTML = "";
 players.forEach((p,i)=>{
-playersList.innerHTML += `
-<div class="card">
-#${i+1} ${p}
-</div>`;
+list.innerHTML += `<div class="card">#${i+1} ${p}</div>`;
 });
+}
 
-// render levels
-const levelsList = document.getElementById("levelsList");
+//////////////////////
+// MENU SWITCH
+//////////////////////
 
-levels.forEach((l,i)=>{
-levelsList.innerHTML += `
-<div class="card">
-#${i+1} ${l}
-</div>`;
-});
+function showPage(page){
+
+document.getElementById("levelsPage").classList.add("hidden");
+document.getElementById("playersPage").classList.add("hidden");
+
+if(page==="levels") document.getElementById("levelsPage").classList.remove("hidden");
+if(page==="players") document.getElementById("playersPage").classList.remove("hidden");
+
+}
+
+//////////////////////
+// ADD FUNCTIONS
+//////////////////////
+
+function addLevel(){
+let name = prompt("Enter level name:");
+if(name) levels.push(name);
+renderLevels();
+}
+
+function addPlayer(){
+let name = prompt("Enter player name:");
+if(name) players.push(name);
+renderPlayers();
+}
+
+//////////////////////
+// INIT
+//////////////////////
+
+renderLevels();
+renderPlayers();
 
 </script>
 
