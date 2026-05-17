@@ -46,11 +46,10 @@ background:#1c1c1c;
 padding:12px;
 margin:8px 0;
 border-left:5px solid #d62d2d;
+display:flex;
+justify-content:space-between;
+align-items:center;
 }
-
-h2{color:#ff4040}
-
-.hidden{display:none}
 
 button{
 background:#d62d2d;
@@ -58,9 +57,11 @@ color:white;
 border:none;
 padding:6px 10px;
 cursor:pointer;
-margin-top:10px;
 }
+
 button:hover{background:#ff4040}
+
+.hidden{display:none}
 </style>
 </head>
 
@@ -72,32 +73,59 @@ button:hover{background:#ff4040}
 <nav>
 <a onclick="showPage('levels')">Levels</a>
 <a onclick="showPage('players')">Players</a>
+<a onclick="login()">Login</a>
 </nav>
 </header>
 
-<!-- LEVELS PAGE -->
+<!-- LEVELS -->
 <section id="levelsPage">
 <h2>📊 Top Levels</h2>
 <div id="levelsList"></div>
-
 <button onclick="addLevel()">+ Add Level</button>
 </section>
 
-<!-- PLAYERS PAGE -->
+<!-- PLAYERS -->
 <section id="playersPage" class="hidden">
 <h2>🏆 Top Players</h2>
 <div id="playersList"></div>
-
 <button onclick="addPlayer()">+ Add Player</button>
 </section>
 
-<script>
+<script type="module">
 
-//////////////////////
-// ✏️ EDIT HERE
-//////////////////////
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+getFirestore,
+collection,
+getDocs,
+addDoc,
+deleteDoc,
+doc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-let levels = [
+import {
+getAuth,
+signInWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+/* 🔥 FIREBASE CONFIG (заміни на свій) */
+const firebaseConfig = {
+apiKey: "AIzaSyDqe1P5mNBswq0gnuLScHyRn1iD27T2y4c",
+authDomain: "eternal-list-28bef.firebaseapp.com",
+projectId: "eternal-list-28bef",
+appId: "1:999099656760:web:367da0352ae8b9db8494cd"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+/* 👑 ADMIN */
+const ADMIN_EMAIL = "kisliynazar4@gmail.com";
+window.isAdmin = false;
+
+/* 💾 DEFAULT (твій старий список) */
+let localLevels = [
 "Thinking Space V",
 "Megatrone",
 "Miiopk009 Ship Trials (Buffed)",
@@ -110,7 +138,7 @@ let levels = [
 "Top 10"
 ];
 
-let players = [
+let localPlayers = [
 "Miiopk009",
 "Zoink",
 "Doggie",
@@ -123,62 +151,134 @@ let players = [
 "Riot"
 ];
 
-//////////////////////
-// RENDER FUNCTIONS
-//////////////////////
+/* 🌍 LIVE DATA */
+let levels = [];
+let players = [];
 
+/* 🔐 LOGIN */
+window.login = async function(){
+const email = prompt("Email:");
+const pass = prompt("Password:");
+
+const user = await signInWithEmailAndPassword(auth,email,pass);
+
+if(user.user.email === ADMIN_EMAIL){
+window.isAdmin = true;
+alert("ADMIN LOGGED IN");
+} else {
+alert("USER LOGGED IN");
+}
+};
+
+/* 📊 LOAD LEVELS */
+async function loadLevels(){
+const snap = await getDocs(collection(db,"levels"));
+levels = [];
+
+snap.forEach(d=>{
+levels.push({id:d.id,...d.data()});
+});
+
+if(levels.length === 0){
+levels = localLevels.map((n,i)=>({id:i,name:n}));
+}
+
+renderLevels();
+}
+
+/* 👤 LOAD PLAYERS */
+async function loadPlayers(){
+const snap = await getDocs(collection(db,"players"));
+players = [];
+
+snap.forEach(d=>{
+players.push({id:d.id,...d.data()});
+});
+
+if(players.length === 0){
+players = localPlayers.map((n,i)=>({id:i,name:n}));
+}
+
+renderPlayers();
+}
+
+/* ➕ ADD LEVEL */
+window.addLevel = async function(){
+if(!window.isAdmin) return alert("NOT ADMIN");
+
+let name = prompt("Level name:");
+if(!name) return;
+
+await addDoc(collection(db,"levels"),{name});
+
+loadLevels();
+};
+
+/* ➕ ADD PLAYER */
+window.addPlayer = async function(){
+if(!window.isAdmin) return alert("NOT ADMIN");
+
+let name = prompt("Player name:");
+if(!name) return;
+
+await addDoc(collection(db,"players"),{name});
+
+loadPlayers();
+};
+
+/* ❌ DELETE */
+window.deleteLevel = async function(id){
+if(!window.isAdmin) return;
+await deleteDoc(doc(db,"levels",id));
+loadLevels();
+};
+
+window.deletePlayer = async function(id){
+if(!window.isAdmin) return;
+await deleteDoc(doc(db,"players",id));
+loadPlayers();
+};
+
+/* 🖥 RENDER LEVELS */
 function renderLevels(){
 const list = document.getElementById("levelsList");
-list.innerHTML = "";
+list.innerHTML="";
+
 levels.forEach((l,i)=>{
-list.innerHTML += `<div class="card">#${i+1} ${l}</div>`;
+list.innerHTML += `
+<div class="card">
+<div>#${i+1} ${l.name}</div>
+${window.isAdmin ? `<button onclick="deleteLevel('${l.id}')">X</button>` : ""}
+</div>`;
 });
 }
 
+/* 🖥 RENDER PLAYERS */
 function renderPlayers(){
 const list = document.getElementById("playersList");
-list.innerHTML = "";
+list.innerHTML="";
+
 players.forEach((p,i)=>{
-list.innerHTML += `<div class="card">#${i+1} ${p}</div>`;
+list.innerHTML += `
+<div class="card">
+<div>#${i+1} ${p.name}</div>
+${window.isAdmin ? `<button onclick="deletePlayer('${p.id}')">X</button>` : ""}
+</div>`;
 });
 }
 
-//////////////////////
-// MENU SWITCH
-//////////////////////
-
-function showPage(page){
-
+/* 🔄 MENU */
+window.showPage = function(page){
 document.getElementById("levelsPage").classList.add("hidden");
 document.getElementById("playersPage").classList.add("hidden");
 
 if(page==="levels") document.getElementById("levelsPage").classList.remove("hidden");
 if(page==="players") document.getElementById("playersPage").classList.remove("hidden");
+};
 
-}
-
-//////////////////////
-// ADD FUNCTIONS
-//////////////////////
-
-function addLevel(){
-let name = prompt("Enter level name:");
-if(name) levels.push(name);
-renderLevels();
-}
-
-function addPlayer(){
-let name = prompt("Enter player name:");
-if(name) players.push(name);
-renderPlayers();
-}
-
-//////////////////////
-// INIT
-//////////////////////
-
-renderLevels();
-renderPlayers();
+/* 🚀 INIT */
+loadLevels();
+loadPlayers();
 
 </script>
 
