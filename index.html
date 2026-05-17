@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Eternal List</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
@@ -57,7 +57,7 @@ padding:5px 10px;
 cursor:pointer;
 }
 
-button:hover{background:#ff6666}
+button:hover{background:#ff6b6b}
 
 input{
 padding:6px;
@@ -83,6 +83,8 @@ margin-bottom:10px;
 <a onclick="show('levels')">Levels</a>
 <a onclick="show('players')">Players</a>
 <a onclick="showTop10()">Top 10</a>
+<a onclick="signup()">Sign-up</a>
+<a onclick="login()">Login</a>
 </nav>
 </header>
 
@@ -90,13 +92,13 @@ margin-bottom:10px;
 
 <!-- LEVELS -->
 <section id="levelsPage">
-<div class="section-title">🏆 TOP 100 LEVELS</div>
+<div class="section-title">🏆 TOP LEVELS</div>
 
 <input id="levelSearch" placeholder="Search levels..." oninput="renderLevels()">
 
 <br>
 
-<input id="levelName" placeholder="Level name">
+<input id="levelInput" placeholder="Level name">
 <button onclick="addLevel()">Add</button>
 
 <div id="levelsList"></div>
@@ -106,7 +108,7 @@ margin-bottom:10px;
 <section id="playersPage" class="hidden">
 <div class="section-title">👤 PLAYERS</div>
 
-<input id="playerName" placeholder="Player name">
+<input id="playerInput" placeholder="Player name">
 <button onclick="addPlayer()">Add</button>
 
 <div id="playersList"></div>
@@ -129,11 +131,13 @@ collection,
 getDocs,
 addDoc,
 deleteDoc,
-doc
+doc,
+setDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 import {
 getAuth,
+createUserWithEmailAndPassword,
 signInWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
@@ -150,11 +154,12 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 /* 👑 ADMIN */
-const ADMIN_EMAIL = "admin@gmail.com";
+const ADMIN_EMAIL="kisliynazar4@gmail.com";
+const ADMIN_PASSWORD="eternal-list$html.com)))";
 window.isAdmin=false;
 
-/* 💾 YOUR ORIGINAL DATA (SAFE FALLBACK) */
-let defaultLevels = [
+/* 💾 FALLBACK DATA */
+let defaultLevels=[
 "Thinking Space V",
 "Megatrone",
 "Miiopk009 Ship Trials (Buffed)",
@@ -167,7 +172,7 @@ let defaultLevels = [
 "Top 10"
 ];
 
-let defaultPlayers = [
+let defaultPlayers=[
 "Miiopk009",
 "Zoink",
 "Doggie",
@@ -184,23 +189,49 @@ let defaultPlayers = [
 let levels=[];
 let players=[];
 
-/* 🧠 POINTERCRATE STYLE */
+/* 🧠 POINTS SYSTEM */
 function calcPoints(pos){
 return Math.max(0,1000 - pos*8);
 }
 
-/* 🔐 LOGIN */
-window.login = async function(){
-const email=prompt("email");
-const pass=prompt("password");
+/* 🔐 SIGNUP */
+window.signup=async function(){
+const email=prompt("Email:");
+const pass=prompt("Password:");
+const name=prompt("Nickname:");
 
-const user=await signInWithEmailAndPassword(auth,email,pass);
+const user=await createUserWithEmailAndPassword(auth,email,pass);
+
+await setDoc(doc(db,"users",user.user.uid),{
+name,
+email,
+points:0,
+hardest:"",
+youtube:""
+});
+
+alert("Account created!");
+};
+
+/* 🔑 LOGIN */
+window.login=async function(){
+const email=prompt("Email:");
+const pass=prompt("Password:");
+
+await signInWithEmailAndPassword(auth,email,pass);
 
 if(email===ADMIN_EMAIL){
+const p=prompt("Admin password:");
+if(p===ADMIN_PASSWORD){
 window.isAdmin=true;
-alert("ADMIN LOGGED IN");
+alert("ADMIN MODE 🔥");
+}else{
+alert("Wrong admin password");
 }
+}else{
+alert("User logged in");
 }
+};
 
 /* 📊 LOAD LEVELS */
 async function loadLevels(){
@@ -211,10 +242,9 @@ snap.forEach(d=>{
 levels.push({id:d.id,...d.data()});
 });
 
-/* 🔥 fallback if empty */
 if(levels.length===0){
-levels = defaultLevels.map((n,i)=>({
-id:i,
+levels=defaultLevels.map((n,i)=>({
+id:"local"+i,
 name:n,
 position:i+1,
 points:calcPoints(i+1)
@@ -233,12 +263,11 @@ snap.forEach(d=>{
 players.push({id:d.id,...d.data()});
 });
 
-/* 🔥 fallback */
 if(players.length===0){
-players = defaultPlayers.map((n,i)=>({
-id:i,
+players=defaultPlayers.map((n,i)=>({
+id:"local"+i,
 name:n,
-points:1000-i*50
+points:1000-i*40
 }));
 }
 
@@ -246,12 +275,12 @@ renderPlayers();
 renderTop10();
 }
 
-/* ➕ LEVEL */
-window.addLevel = async function(){
-if(!window.isAdmin) return alert("NOT ADMIN");
+/* ➕ ADD LEVEL */
+window.addLevel=async function(){
+if(!window.isAdmin)return;
 
-let name=document.getElementById("levelName").value;
-if(!name) return;
+let name=levelInput.value;
+if(!name)return;
 
 await addDoc(collection(db,"levels"),{
 name,
@@ -260,14 +289,14 @@ points:calcPoints(levels.length+1)
 });
 
 loadLevels();
-}
+};
 
-/* ➕ PLAYER */
-window.addPlayer = async function(){
-if(!window.isAdmin) return alert("NOT ADMIN");
+/* ➕ ADD PLAYER */
+window.addPlayer=async function(){
+if(!window.isAdmin)return;
 
-let name=document.getElementById("playerName").value;
-if(!name) return;
+let name=playerInput.value;
+if(!name)return;
 
 await addDoc(collection(db,"users"),{
 name,
@@ -275,28 +304,26 @@ points:0
 });
 
 loadPlayers();
-}
+};
 
 /* ❌ DELETE */
 window.deleteLevel=async function(id){
-if(!window.isAdmin) return;
+if(!window.isAdmin)return;
 await deleteDoc(doc(db,"levels",id));
 loadLevels();
-}
+};
 
 /* 🔍 SEARCH */
 function filtered(){
-let q=document.getElementById("levelSearch")?.value||"";
-return levels.filter(l=>l.name.toLowerCase().includes(q.toLowerCase()));
+let q=levelSearch.value?.toLowerCase()||"";
+return levels.filter(l=>l.name.toLowerCase().includes(q));
 }
 
 /* 🖥 LEVELS */
 window.renderLevels=function(){
-const el=document.getElementById("levelsList");
-el.innerHTML="";
-
+levelsList.innerHTML="";
 filtered().forEach((l,i)=>{
-el.innerHTML+=`
+levelsList.innerHTML+=`
 <div class="card">
 <div>#${i+1} ${l.name}</div>
 ${window.isAdmin?`<button onclick="deleteLevel('${l.id}')">X</button>`:""}
@@ -306,11 +333,9 @@ ${window.isAdmin?`<button onclick="deleteLevel('${l.id}')">X</button>`:""}
 
 /* 🖥 PLAYERS */
 window.renderPlayers=function(){
-const el=document.getElementById("playersList");
-el.innerHTML="";
-
+playersList.innerHTML="";
 players.forEach((p,i)=>{
-el.innerHTML+=`
+playersList.innerHTML+=`
 <div class="card">
 <div>${p.name} (${p.points||0})</div>
 </div>`;
@@ -319,23 +344,21 @@ el.innerHTML+=`
 
 /* 🏆 TOP 10 */
 window.renderTop10=function(){
-const el=document.getElementById("top10List");
+top10List.innerHTML="";
 
-let top=[...players].sort((a,b)=>(b.points||0)-(a.points||0)).slice(0,10);
-
-el.innerHTML="";
-
-top.forEach((p,i)=>{
-el.innerHTML+=`
-<div class="card">#${i+1} ${p.name} - ${p.points||0}</div>
-`;
+[...players]
+.sort((a,b)=>(b.points||0)-(a.points||0))
+.slice(0,10)
+.forEach((p,i)=>{
+top10List.innerHTML+=`
+<div class="card">#${i+1} ${p.name} - ${p.points||0}</div>`;
 });
 }
 
 /* NAV */
-window.show=function(page){
-levelsPage.style.display=page==="levels"?"block":"none";
-playersPage.style.display=page==="players"?"block":"none";
+window.show=function(p){
+levelsPage.style.display=p==="levels"?"block":"none";
+playersPage.style.display=p==="players"?"block":"none";
 top10Page.style.display="none";
 }
 
